@@ -29,8 +29,7 @@ class Trainer:
         """The sum total of the modifier list (default 1)"""
 
     def __int__(self, generation:int, population:list=None, size=50, max_mute:float=0.1, norm_size:int=1, seed:int=None):
-
-        # Set the variables to the varibles
+         # Set the variables to the varibles
         # Auto generate the fitness list
         self.fitness = [] * size
         self.population = population
