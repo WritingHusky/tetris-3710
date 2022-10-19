@@ -49,17 +49,17 @@ def aggregate_height(playField):
 
     numRows = len(playField)
     numCols = len(playField[0])
-    totalCells = numRows * numCols
-    emptyCell = 0
     zerocount = 0
+    aggHeight = 0
     
-    for row in playField:
-        zerocount += row.count(emptyCell)
+    for i in range(numCols):
+        for j in range(numRows):
+            if (playfield[i][j] == 0):
+                zerocount += 1
+        aggHeight += (numRows - zerocount)
+        zerocount = 0
 
-    # call function to get number of holes
-    numHoles = holeCount(playField) 
-
-    return (totalCells - (zerocount - numHoles)) 
+    return (aggHeight) 
 
 def count_holes(playField):
     # count the number of holes in the playField
@@ -72,37 +72,11 @@ def count_holes(playField):
     # the elements represented by '.' can be ignored
 
     # make a copy of the array so we can add notes to it.
-    tempPlayField = playField.copy()
-    numRows = len(tempPlayField)
-    numCols = len(tempPlayField[0])
-    hole = 9
     holeCount = 0
-    # start on the second row and cycle through the columns
-    for i in range (1,numRows):
-        for j in range (numCols):
-
-    # if element is empty (value is 0)
-    #   first check if cell above is empty
-    #       if it is empty, then continue.
-    #   next check to the right
-    #       if it is empty, then continue.
-    #   next check to the left
-    #       if it is empty, then continue.
-    #   otherwise
-    #       mark it as a hole
-    #       increment the hole counter
-
-            if (tempPlayField[i][j] == 0):
-                if (tempPlayField[i-1][j] == 0):
-                    continue
-                if (i>0):
-                    if (tempPlayField[i][j-1] == 0):
-                        continue
-                if (i<j):
-                    if (tempPlayField[i][j+i] == 0):
-                        continue
-                tempPlayField[i][j] = hole
-                holeCount += holeCount
+    hole = 0
+   
+    for row in playField:
+        holeCount += row.count(hole)
 
     return holeCount
 
