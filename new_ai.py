@@ -1,7 +1,6 @@
 from re import I
 from syslog import LOG_LOCAL0
 
-
 def generate_positions():
     """Generate all the possible positions that are possible
         Returns a list of all the positions relative point (0,0)"""
@@ -59,7 +58,7 @@ def aggregate_height(playField):
         aggHeight += (numRows - zerocount)
         zerocount = 0
 
-    return (aggHeight) 
+    return (aggHeight)
 
 def count_holes(playField):
     # count the number of holes in the playField
@@ -72,11 +71,16 @@ def count_holes(playField):
     # the elements represented by '.' can be ignored
 
     # make a copy of the array so we can add notes to it.
-    holeCount = 0
+    zeroCount = 0
     hole = 0
-   
+    holeCount = 0
+    
+    totalCells = len(playField) * len(playField[0])
+
     for row in playField:
-        holeCount += row.count(hole)
+        zeroCount += row.count(hole)
+
+    holeCount = zeroCount - ( totalCells - aggregate_height(playField) )
 
     return holeCount
 
