@@ -63,14 +63,10 @@ def aggregate_height(playField):
 def count_holes(playField):
     # count the number of holes in the playField
     # holes are defined as infilled cells that cannot be accessed.
-    # . X . 
-    # X E X
-    # . . .
-    # The "E" is the element to examine. If it's zero, then we need to test if it's a hole.
-    # to test, we need to know if the elements shown as X are zero or not.
-    # the elements represented by '.' can be ignored
+    # For this, we determine how many empty cells are in the entire playfield
+    # then we subtract the total number of cells and add back in the aggregate height
+    # this gives us an admittedly inaccurate, but close, number of holes.
 
-    # make a copy of the array so we can add notes to it.
     zeroCount = 0
     hole = 0
     holeCount = 0
@@ -85,5 +81,15 @@ def count_holes(playField):
     return holeCount
 
 def bumpiness(playField):
+    #
+    # return an array the same length of the number of columns
+    # first n entries are the differences between adjacent columns.
+    # the final entry is the average bumpiness or sum of the bumpiness
+    return 0
+
+def completed_lines(playField):
     # 
+    # applied once a piece is placed.
+    # look for lines that have no empty cells
+    
     return 0
