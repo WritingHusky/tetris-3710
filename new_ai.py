@@ -61,8 +61,12 @@ def aggregate_height(playField):
     
     for i in range(numCols):
         for j in range(numRows):
-            if (playField[i][j] == 0):
+
+            if (playField[j][i] == 0):
                 zerocount += 1
+            else:
+                break
+
         aggHeight += (numRows - zerocount)
         zerocount = 0
 
