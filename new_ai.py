@@ -1,28 +1,36 @@
 from re import I
 from syslog import LOG_LOCAL0
 
+
 def generate_positions():
     """Generate all the possible positions that are possible
         Returns a list of all the positions relative point (0,0)"""
+    # finds state space 
+    # determines all potential final placements of the piece on the board
     return
 
 
 def collision_check():
     """Checks if the figure overlaps the field at any point
         Returns boolean of validity"""
-
-    return
+    # arguments:
+    # position of current piece
+    # board
+    # which piece is in play
+    return #boolean t/f (valid = true)
 
 
 def find_best_place():
     """Function to evaluate the different possible positions and find the best according to the modifiers
         Returns the position of the best placement from a list of positions"""
+    # takes data from generate_positions and returns the best position using f()
     return
 
 
 def f():
     """The evaluation function of a state
         Returns a value 0<x<10? on how good the state is"""
+    # decision based on statistics
     return
 
 
