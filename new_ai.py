@@ -10,15 +10,42 @@ def generate_positions():
     return
 
 
-def collision_check():
+def collision_check(playField, piece, position):
     """Checks if the figure overlaps the field at any point
         Returns boolean of validity"""
     # arguments:
-    # position of current piece
+    # position of current piece (relative to [0,0] on the piece)
     # board
     # which piece is in play
-    return #boolean t/f (valid = true)
+    # returns boolean (valid = true)
+    t_piece=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+    t_playField = playField.copy()
 
+    # the piece is a single dimensional array, so it's necessary to convert it to a 2D array.
+    # // 4 to get the row and mod 4 to get the column
+    for i in piece:
+        pieceRow = i // 4
+        pieceCol = i % 4
+        
+        # 0 -> 0,0   3 -> 0,3
+        # 4 -> 1,0   7 -> 1,3
+        # 8 -> 2,0  11 -> 2,3
+        #12 -> 3,0  15 -> 3,3
+
+        t_piece[pieceRow][pieceCol] = 1
+
+    # go to position of piece on playfield
+    # if any cell in the piece overlays on an occupied cell on the playfield, then collision
+
+    xOffset = position[0]
+    yOffset = position[1]
+
+    for i in range(4):
+        for j in range(4):
+            if (t_playField[i+xOffset][j+yOffset] > 0) and (t_piece[i][j] > 0):
+                return True
+
+    return False
 
 def find_best_place():
     """Function to evaluate the different possible positions and find the best according to the modifiers
