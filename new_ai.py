@@ -1,51 +1,44 @@
 from re import I
 from syslog import LOG_LOCAL0
+#from tetris import Figure
 
+def check_position():
+    #  is any portion of the piece off the grid?
+    #
+    #  is there a collsion?
+    #     if either of these is true, then it is not a valid position.
+    return
 
 def generate_positions():
     """Generate all the possible positions that are possible
         Returns a list of all the positions relative point (0,0)"""
     # finds state space 
     # determines all potential final placements of the piece on the board
+
     return
 
+#copied code from tetris.py and modified it for our use. Notably, the for loop
+#xpos and ypos are position of the figure on the playField
+def collision_check(playField, figure, xpos, ypos): 
+    intersection = False
 
-def collision_check(playField, piece, position):
-    """Checks if the figure overlaps the field at any point
-        Returns boolean of validity"""
-    # arguments:
-    # position of current piece (relative to [0,0] on the piece)
-    # board
-    # which piece is in play
-    # returns boolean (valid = true)
-    t_piece=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-    t_playField = playField.copy()
+    height = len(playField)
+    width = len(playField[0])
 
-    # the piece is a single dimensional array, so it's necessary to convert it to a 2D array.
-    # // 4 to get the row and mod 4 to get the column
-    for i in piece:
-        pieceRow = i // 4
-        pieceCol = i % 4
-        
-        # 0 -> 0,0   3 -> 0,3
-        # 4 -> 1,0   7 -> 1,3
-        # 8 -> 2,0  11 -> 2,3
-        #12 -> 3,0  15 -> 3,3
-
-        t_piece[pieceRow][pieceCol] = 1
-
-    # go to position of piece on playfield
-    # if any cell in the piece overlays on an occupied cell on the playfield, then collision
-
-    xOffset = position[0]
-    yOffset = position[1]
+    #print(playField)
+    #print(figure)
+    #print(xpos)
+    #print(ypos)
 
     for i in range(4):
         for j in range(4):
-            if (t_playField[i+xOffset][j+yOffset] > 0) and (t_piece[i][j] > 0):
-                return True
-
-    return False
+            if i * 4 + j in figure:
+               if i + ypos > height - 1 or \
+                       j + xpos > width - 1 or \
+                       j + xpos < 0 or \
+                       playField[i + ypos][j + xpos] > 0:
+                   intersection = True
+    return intersection
 
 def find_best_place():
     """Function to evaluate the different possible positions and find the best according to the modifiers

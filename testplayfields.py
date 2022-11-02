@@ -55,7 +55,7 @@ playField2 = [
 ]
 
 testPiece = [1, 5, 8, 9]
-testPosition = [14,1]
+testPosition = [5,5]
 
 aggHeight1 = nai.aggregate_height(playField1)
 numHoles1 = nai.count_holes(playField1)
@@ -69,5 +69,6 @@ numHoles2 = nai.count_holes(playField2)
 print("Aggregate Height: ", aggHeight2)
 print("Number of Holes: ", numHoles2)
 
-testCollision = nai.collision_check(playField1, testPiece, testPosition)
+#testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
+testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
 print("Collision? :", testCollision)
