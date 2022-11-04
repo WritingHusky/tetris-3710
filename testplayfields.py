@@ -48,13 +48,13 @@ playField2 = [
     [1,1,0,0,0,0,0,0,0,0],
     [0,1,0,0,0,1,0,0,0,0],
     [1,1,0,0,0,1,0,0,0,0],
-    [1,0,0,0,0,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,0,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1]
+    [1,0,0,0,1,1,1,1,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1]
 ]
 
-testPiece = [1, 5, 8, 9]
+'''testPiece = [1, 5, 8, 9]
 testPosition = [5,5]
 
 aggHeight1 = nai.aggregate_height(playField1)
@@ -71,4 +71,21 @@ print("Number of Holes: ", numHoles2)
 
 #testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
 testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
-print("Collision? :", testCollision)
+print("Collision? :", testCollision) 
+'''
+
+figures = [
+    [[1, 5, 9, 13], [4, 5, 6, 7]],
+    [[4, 5, 9, 10], [2, 6, 5, 9]],
+    [[6, 7, 9, 10], [1, 5, 6, 10]],
+    [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 9, 8], [4, 5, 6, 10]],
+    [[1, 2, 6, 10], [5, 6, 7, 9], [2, 6, 10, 11], [3, 5, 6, 7]],
+    [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]],
+    [[1, 2, 5, 6]],
+]
+
+figure = figures[6]
+positions = nai.generate_positions(playField2, figure)
+numRotations = len(positions)
+print("Number of Rotations: ", numRotations)
+print(positions)

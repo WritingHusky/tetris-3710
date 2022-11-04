@@ -2,33 +2,61 @@ from re import I
 from syslog import LOG_LOCAL0
 #from tetris import Figure
 
-def check_position():
-    #  is any portion of the piece off the grid?
-    #
-    #  is there a collsion?
-    #     if either of these is true, then it is not a valid position.
-    return
-
-def generate_positions():
+def generate_positions(playField, figures):
     """Generate all the possible positions that are possible
         Returns a list of all the positions relative point (0,0)"""
     # finds state space 
     # determines all potential final placements of the piece on the board
 
-    return
+    # do we really need to generate every last position possible, or can we just find the positions right before the collision occurs?
 
-#copied code from tetris.py and modified it for our use. Notably, the for loop
-#xpos and ypos are position of the figure on the playField
+    # start with rotation 1
+    # A. place piece at 0,0
+    # 1. test if collision
+    # 1a. If no collision, then add to list
+    # 1b. If collision, continue
+    # 2. move right
+    # 3. repeat 1-2 until we collide or hit the bottom
+    # B. if there's no more rotations, we're done
+    #   otherwise, switch to next rotation and repeat from A
+
+    # deficiencies:
+    # will place a piece into holes when they are large enough. how do we deal with this?
+    # Go down then right instead. 
+    # When we collide on the way down, finish that column and move right.
+
+    fieldHeight = len(playField)
+    fieldWidth = len(playField[0])
+    numRotations = len(figures)
+
+    validPositions = []
+
+    r = 0
+    x = 0
+    y = 0
+
+    for r in range(numRotations):
+        validRotationPositions = []
+        for x in range(fieldWidth):
+            
+            for y in range(fieldHeight):
+                if not (collision_check(playField, figures[r], x, y)) :
+                    validRotationPositions.append([x,y])
+                else:
+                    break
+        validPositions.append(validRotationPositions)
+    
+    return validPositions
+
+
 def collision_check(playField, figure, xpos, ypos): 
+    #copied code from tetris.py and modified it (changed variable names) for our use.
+    #xpos and ypos are position of the figure on the playField
+
     intersection = False
 
     height = len(playField)
     width = len(playField[0])
-
-    #print(playField)
-    #print(figure)
-    #print(xpos)
-    #print(ypos)
 
     for i in range(4):
         for j in range(4):
