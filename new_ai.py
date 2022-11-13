@@ -37,9 +37,9 @@ def generate_positions(playField, figures):
 
     for r in range(numRotations):
         validRotationPositions = []
-        for x in range(fieldWidth):
+        for x in range(fieldWidth): #columns
             
-            for y in range(fieldHeight):
+            for y in range(fieldHeight): #rows
                 if not (collision_check(playField, figures[r], x, y)) :
                     validRotationPositions.append([x,y])
                 else:
@@ -68,10 +68,63 @@ def collision_check(playField, figure, xpos, ypos):
                    intersection = True
     return intersection
 
+def h_generate_positions(playField, figures):
+    """Generate all the possible positions that are possible
+        Returns a list of all the positions relative point (0,0)"""
+    # finds state space
+    # determines all potential final placements of the piece on the board
+
+    # do we really need to generate every last position possible, or can we just find the positions right before the collision occurs?
+
+    # start with rotation 1
+    # A. place piece at 0,0
+    # 1. test if collision
+    # 1a. If no collision, then add to list
+    # 1b. If collision, continue
+    # 2. move right
+    # 3. repeat 1-2 until we collide or hit the bottom
+    # B. if there's no more rotations, we're done
+    #   otherwise, switch to next rotation and repeat from A
+
+    # deficiencies:
+    # will place a piece into holes when they are large enough. how do we deal with this?
+    # Go down then right instead. 
+    # When we collide on the way down, finish that column and move right.
+
+    fieldHeight = len(playField)
+    fieldWidth = len(playField[0])
+    numRotations = len(figures)
+
+    validPositions = []
+    currentValidPosition = []
+
+    r = 0
+    x = 0
+    y = 0
+
+    for r in range(numRotations):
+        validRotationPositions = []
+        for x in range(fieldWidth): #columns
+            
+            for y in range(fieldHeight): #rows
+                if not (collision_check(playField, figures[r], x, y)) :
+                    currentValidPosition=[x,y]
+                else:
+                    if (currentValidPosition not in validRotationPositions):
+                        validRotationPositions.append(currentValidPosition)
+                    break
+                #validRotationPositions.append(currentValidPosition)
+        validPositions.append(validRotationPositions)
+    
+    return validPositions
+
 def find_best_place():
     """Function to evaluate the different possible positions and find the best according to the modifiers
         Returns the position of the best placement from a list of positions"""
     # takes data from generate_positions and returns the best position using f()
+
+
+
     return
 
 

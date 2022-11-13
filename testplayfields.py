@@ -85,7 +85,7 @@ figures = [
 ]
 
 figure = figures[0]
-positions = nai.generate_positions(playField2, figure)
+positions = nai.h_generate_positions(playField2, figure)
 numRotations = len(positions)
 print("Number of Rotations: ", numRotations)
 print(positions)
