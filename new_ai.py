@@ -204,5 +204,15 @@ def completed_lines(playField):
     # 
     # applied once a piece is placed.
     # look for lines that have no empty cells
-    
+    numRows = len(playField)
+    numCols = len(playField[0])
+    compLines = 0
+    for i in range(numRows):
+        line = True
+        for j in range(numCols):
+            if(playField[i][j] == 0):
+                line = False
+                break
+        if(line == True):
+            compLines+=1
     return 0
