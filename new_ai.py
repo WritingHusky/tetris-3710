@@ -153,12 +153,12 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
     return  bestPlacement  # best place returned
 
 
-def f(aggHeight, numHoles, amtBumpy, completedLines, weights):
+def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.25]):
     """The evaluation function of a state
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
 
-    score = (aggHeight * weights[0]) + (numHoles * weight[1]) + (amtBumpy * weights[2]) + ( (4 - completedLines) * weights(3))
+    score = (aggHeight * weights[0]) + (numHoles * weights[1]) + (amtBumpy * weights[2]) + ( (4 - completedLines) * weights[3])
 
     return score
 

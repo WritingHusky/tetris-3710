@@ -91,4 +91,8 @@ numRotations = len(positions)
 print("Number of Rotations: ", numRotations)
 print(positions)
 
-print("Completed Lines: " , nai.completed_lines(playField1))
+completedLines1 = nai.completed_lines(playField1)
+print("Completed Lines: " , completedLines1)
+
+score = nai.f(aggHeight1, numHoles1, 3, completedLines1)
+print("Score: ", score)
