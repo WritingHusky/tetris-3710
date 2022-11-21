@@ -29,24 +29,24 @@ def generate_positions(playField, figures):
     fieldWidth = len(playField[0])
     numRotations = len(figures)
 
-    validPositions = []
+    Positions = []
 
     r = 0
     x = 0
     y = 0
 
     for r in range(numRotations):
-        validRotationPositions = []
+        RotationPositions = []
         for x in range(fieldWidth): #columns
             
             for y in range(fieldHeight): #rows
                 if not (collision_check(playField, figures[r], x, y)) :
-                    validRotationPositions.append([x,y])
+                    RotationPositions.append([x,y])
                 else:
                     break
-        validPositions.append(validRotationPositions)
+        Positions.append(RotationPositions)
     
-    return validPositions
+    return Positions
 
 
 def collision_check(playField, figure, xpos, ypos): 
@@ -85,11 +85,8 @@ def h_generate_positions(playField, figures):
     # 3. repeat 1-2 until we collide or hit the bottom
     # B. if there's no more rotations, we're done
     #   otherwise, switch to next rotation and repeat from A
-
-    # deficiencies:
-    # will place a piece into holes when they are large enough. how do we deal with this?
-    # Go down then right instead. 
-    # When we collide on the way down, finish that column and move right.
+    # Heuristics: A piece cannot be suspended in mid-air.
+    #           We ignore those invalid positions.
 
     fieldHeight = len(playField)
     fieldWidth = len(playField[0])
@@ -113,26 +110,57 @@ def h_generate_positions(playField, figures):
                     if (currentValidPosition not in validRotationPositions):
                         validRotationPositions.append(currentValidPosition)
                     break
-                #validRotationPositions.append(currentValidPosition)
+
         validPositions.append(validRotationPositions)
     
     return validPositions
 
-def find_best_place():
+def place_on_playfield(playField, figure, position):
+
+    return playField
+    
+
+def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weights to be passed to f()
     """Function to evaluate the different possible positions and find the best according to the modifiers
         Returns the position of the best placement from a list of positions"""
     # takes data from generate_positions and returns the best position using f()
 
+    placements = []  
+
+    # find all the valid places
+    validPositions = h_generate_positions(playField, figure)
+    
+    # iterate through the validPositions list. deal with each rotations separately.
+    numRotations = len(validPositions)
+    for rotation in range(numRotations):
+        for position in validPositions[rotation]:
+            # place position on playField
+            newPlayfield = place_on_playfield[playField, figure, position]
+
+            aggHeight = aggregate_height(newPlayfield)
+            numHoles = count_holes(newPlayfield, aggHeight)  
+            amtBumpy = bumpiness(newPlayfield)
+            completedLines = completed_lines(newPlayfield)
+
+            # call f() to determine the "score" of the placement            
+            placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights) 
+            placement = [position, rotation]
+            placements.append([placementScore, placement])
+
+    # find the best (lowest) scoring placement and return that
+    bestPlacement = [rotation,position]  # [r,[x,y]]
+
+    return  bestPlacement  # best place returned
 
 
-    return
-
-
-def f():
+def f(aggHeight, numHoles, amtBumpy, completedLines, weights):
     """The evaluation function of a state
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
-    return
+
+    score = (aggHeight * weights[0]) + (numHoles * weight[1]) + (amtBumpy * weights[2]) + ( (4 - completedLines) * weights(3))
+
+    return score
 
 
 def set_mod():
@@ -173,7 +201,7 @@ def aggregate_height(playField):
 
     return (aggHeight)
 
-def count_holes(playField):
+def count_holes(playField, aggregateHeight = -1 ):
     # count the number of holes in the playField
     # holes are defined as infilled cells that cannot be accessed.
     # For this, we determine how many empty cells are in the entire playfield
@@ -189,7 +217,10 @@ def count_holes(playField):
     for row in playField:
         zeroCount += row.count(hole)
 
-    holeCount = zeroCount - ( totalCells - aggregate_height(playField) )
+    if (aggregateHeight < 0):
+        holeCount = zeroCount - ( totalCells - aggregate_height(playField) )
+    else:
+        holeCount = zeroCount - ( totalCells - aggregateHeight )
 
     return holeCount
 
@@ -200,7 +231,7 @@ def bumpiness(playField):
     # the final entry is the average bumpiness or sum of the bumpiness
     return 0
 
-def completed_lines(playField):
+def completed_lines(playField): 
     # 
     # applied once a piece is placed.
     # look for lines that have no empty cells
