@@ -1,7 +1,7 @@
 import pygame
 import random
-import tetris_ai
-import trainer.py
+import new_ai
+import trainer
 
 colors = [
     (0, 0, 0),
@@ -65,10 +65,32 @@ class Tetris:
             for j in range(width):
                 new_line.append(0)
             self.field.append(new_line)
+            
+        # Initalize the trainer
+        epoch_size = 20 # Number of indiviuals per epoche
+        max_mutation = 0.1 # The max amount that mutation will change a value
+        seed = random.randrange(1000, 9999)# If we want to controll randomness
+        self.trainer = trainer.Trainer()
+        self.trainer.size = epoch_size
+        self.trainer.max_mute = max_mutation
+        self.trainer.set_seed(seed)
+        
+        # Keep track of what number this is in the order
+        self.child_num = 0
 
     # reset the pos of the falling pieces
     def new_figure(self):
         self.figure = Figure(3, 0)
+        
+        # find the best place for the figure
+        new_mods = self.trainer.get_mod(self.child_num)
+        self.child_num += 1
+        
+        ai_place = new_ai.find_best_place(self.field, self.figure, new_mods)
+        self.ai_rotate = ai_place[0]
+        self.ai_x = ai_place[1][0]
+        self.ai_y = ai_place[1][1]
+        # Get the set of inputs to move piece
 
     # Collision detection
     def intersects(self):
@@ -122,6 +144,7 @@ class Tetris:
         self.new_figure()
         if self.intersects():
             self.state = "gameover"
+            
 
     # move the falling piece by dx
     def go_side(self, dx):
@@ -160,9 +183,7 @@ game = Tetris(20, 10)
 counter = 0
 
 pressing_down = False
-
-# Initalize the trainer
-
+player = "ai"
 
 
 while not done:
@@ -181,31 +202,41 @@ while not done:
         if game.state == "start":
             game.go_down()
 
-    # Listen for input from user
-    for event in list(pygame.event.get()) + tetris_ai.run_ai(
-            game.field, game.figure, game.width, game.height
-    ):
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                game.rotate()
-            if event.key == pygame.K_DOWN:
-                pressing_down = True
-            if event.key == pygame.K_LEFT:
-                game.go_side(-1)
-            if event.key == pygame.K_RIGHT:
-                game.go_side(1)
-            if event.key == pygame.K_SPACE:
-                game.go_space()
-            if event.key == pygame.K_ESCAPE:
-                game.__init__(20, 10)
+    #region user input
+    if player is "user":
+        # Listen for input from user
+        for event in list(pygame.event.get()):
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    game.rotate()
+                if event.key == pygame.K_DOWN:
+                    pressing_down = True
+                if event.key == pygame.K_LEFT:
+                    game.go_side(-1)
+                if event.key == pygame.K_RIGHT:
+                    game.go_side(1)
+                if event.key == pygame.K_SPACE:
+                    game.go_space()
+                if event.key == pygame.K_ESCAPE:
+                    game.__init__(20, 10)
 
-    # Stop going down if the key is released
-    if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
-
+        # Stop going down if the key is released
+        if event.type == pygame.KEYUP:
+                if event.key == pygame.K_DOWN:
+                    pressing_down = False
+    #endregion
+    
+    #region ai input
+    if player is "ai":
+        # Put the piece where it should go
+        game.figure.rotation = game.ai_rotate
+        game.figure.x = game.ai_x
+        game.figure.y = game.ai_y
+    #endregion
+    
+    
 # Drawing the screen:
     screen.fill(WHITE)
 
