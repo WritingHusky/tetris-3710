@@ -48,6 +48,7 @@ class Figure:
 class Tetris:
     level = 2
     score = 0
+    cleared_lines = 0
     state = "start"
     field = []
     height = 0
@@ -56,12 +57,14 @@ class Tetris:
     y = 60
     zoom = 20
     figure = None
+    weights = [0.25, 0.25, 0.25, 0.25]
 
     def __init__(self, height, width):
         self.height = height
         self.width = width
         self.field = []
         self.score = 0
+        self.cleared_lines = 0
         self.state = "start"
         for i in range(height):
             new_line = []
@@ -69,30 +72,17 @@ class Tetris:
                 new_line.append(0)
             self.field.append(new_line)
             
-        # Initalize the trainer
-        epoch_size = 20 # Number of indiviuals per epoche
-        max_mutation = 0.1 # The max amount that mutation will change a value
-        seed = random.randrange(1000, 9999)# If we want to controll randomness
-        self.trainer = trainer.Trainer()
-        self.trainer.size = epoch_size
-        self.trainer.max_mute = max_mutation
-        self.trainer.set_seed(seed)
-        
-        # Keep track of what number this is in the order
-        self.child_num = 0
 
     # reset the pos of the falling pieces
     def new_figure(self):
         self.figure = Figure(3, 0)
         
         # find the best place for the figure
-        new_mods = self.trainer.get_mod(self.child_num)
-        self.child_num += 1
-        
-        ai_place = new_ai.find_best_place(self.field, self.figure.fig(), new_mods)
+        ai_place = new_ai.find_best_place(self.field, self.figure.fig(), weights=self.weights)
         self.ai_rotate = ai_place[0]
         self.ai_x = ai_place[1][0]
         self.ai_y = ai_place[1][1]
+        # print(f"The figure will be place at [{self.ai_x}, {self.ai_y}] with rotation number {self.ai_rotate}")
         # Get the set of inputs to move piece
 
     # Collision detection
@@ -147,6 +137,8 @@ class Tetris:
         self.new_figure()
         if self.intersects():
             self.state = "gameover"
+            if player == "ai":
+                self.state = "roundover"
             
 
     # move the falling piece by dx
@@ -163,7 +155,20 @@ class Tetris:
         if self.intersects():
             self.figure.rotation = old_rotation
 
-
+# Initalize the trainer
+class Trainer:
+    def __init__(self):
+        epoch_size = 20 # Number of indiviuals per epoche
+        max_mutation = 0.1 # The max amount that mutation will change a value
+        seed = random.randrange(1000, 9999)# If we want to controll randomness
+        self.trainer = trainer.Trainer()
+        self.trainer.size = epoch_size
+        self.trainer.max_mute = max_mutation
+        self.trainer.set_seed(seed)
+        
+        # Keep track of what number this is in the order
+        self.child_num = 1
+        
 # Initialize the game engine
 pygame.init()
 
@@ -188,25 +193,27 @@ counter = 0
 pressing_down = False
 player = "ai"
 
+# Initialize the trainer
+train = Trainer()
 
 while not done:
     # Create figure if there is none
     if game.figure is None:
         game.new_figure()
 
-    # Counter to limit the speed of the game
-    counter += 1
-    if counter > 100000:
-        counter = 0
-
-    # Go down consistently or when pushing down
-    # Can remove the fps to allow AI time
-    if counter % (fps // game.level // 2) == 0 or pressing_down:
-        if game.state == "start":
-            game.go_down()
-
     #region user input
-    if player is "user":
+    if player == "user":
+        
+        # Counter to limit the speed of the game
+        counter += 1
+        if counter > 100000:
+            counter = 0
+        # Go down consistently or when pushing down
+        # Can remove the fps to allow AI time
+        if counter % (fps // game.level // 2) == 0 or pressing_down:
+            if game.state == "start":
+                game.go_down()
+                
         # Listen for input from user
         for event in list(pygame.event.get()):
             if event.type == pygame.QUIT:
@@ -232,13 +239,35 @@ while not done:
     #endregion
     
     #region ai input
-    if player is "ai":
+    if player == "ai":
         # Put the piece where it should go
         game.figure.rotation = game.ai_rotate
         game.figure.x = game.ai_x
         game.figure.y = game.ai_y
+        
+        for event in list(pygame.event.get()):
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game.__init__(20, 10)
+        game.freeze()
     #endregion
     
+    # If the round ends (can move to after the drawing of the screen maybe)
+    if game.state == "roundover":
+        # Log info about the game and do the post game analysis
+        print(f"saving child {train.child_num}: mod{game.weights}")
+        train.trainer.calc_fitness( game.score, game.cleared_lines)
+        # Update the modifers
+        game.weights = train.trainer.get_mod(train.child_num-1)
+        train.child_num = train.child_num % 20 + 1
+
+        
+        # When done with everthing that restart the game and continue again
+        game.__init__(20, 10)
+        game.figure = None
+        
     
 # Drawing the screen:
     screen.fill(WHITE)
