@@ -230,7 +230,24 @@ def bumpiness(playField):
     # return an array the same length of the number of columns
     # first n entries are the differences between adjacent columns.
     # the final entry is the average bumpiness or sum of the bumpiness
-    return 0
+    numRows = len(playField)
+    numCols = len(playField[0])
+    bumpiness = [0] * numCols
+    sum = 0
+    
+    
+    for i in range(numCols):
+        for j in range(numRows):
+            if(playField[j][i] == 1):
+                bumpiness[i] = numRows - j #gets the position of the highest point of each column
+                break
+    i = 0
+    while i < len(bumpiness)-1:
+        bumpiness[i] = abs(bumpiness[i] - bumpiness[i+1]) #finds delta of each column
+        sum += bumpiness[i]
+        i+=1
+    bumpiness[i] = sum/(len(bumpiness)-1) #provides the average bumpiness
+    return bumpiness
 
 def completed_lines(playField): 
     # 
