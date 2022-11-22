@@ -1,5 +1,4 @@
 import random as random
-import numpy as np
 
 
 class Trainer:
@@ -9,46 +8,57 @@ class Trainer:
     Population formatting:
     modifier = [Aggregate height, complete height, holes, Bumpiness]
     """
-
     def __init__(self): # default constructor (I think that is how this works)
-        self.seed = None
-        """The seed of the epoch because why not"""
-        # All of this code is for defining the varibles with text when hovered over (just ignore)
-        self.fitness = None
-        """The list of fitness scores assigned to each child
-            Note: The list is already creted so the saved values can be saved via the child_num as the index"""
-        self.population = None
-        """The list of children (modifiers) for an epoch (2d list)"""
-        self.size = None
-        """The size of the population (default 50)"""
-        self.generation = None
-        """The epoch generation (nice to have for saving data)"""
-        self.max_mute = None
-        """The max size that the mutation function will change a value"""
-        self.norm_size = None
-        """The sum total of the modifier list (default 1)"""
+            self.seed = None
+            """The seed of the epoch because why not"""
+            # All of this code is for defining the varibles with text when hovered over (just ignore)
+            self.fitness = []
+            """The list of fitness scores assigned to each child
+                Note: The list is already creted so the saved values can be saved via the child_num as the index"""
+            self.population = None
+            """The list of children (modifiers) for an epoch (2d list)"""
+            self.size = 50
+            """The size of the population (default 50)"""
+            self.generation = 0
+            """The epoch generation (nice to have for saving data)"""
+            self.max_mute = 0.1
+            """The max size that the mutation function will change a value"""
+            self.norm_size = 1
+            """The sum total of the modifier list (default 1)"""
 
-    def __int__(self, generation:int, population:list=None, size=50, max_mute:float=0.1, norm_size:int=1, seed:int=None):
+    def __int__(self, generation:int=0, population:list=None, size=50, max_mute:float=0.1, norm_size:int=1, seed:int=None):
          # Set the variables to the varibles
         # Auto generate the fitness list
         self.fitness = [] * size
+        """The list of fitness scores assigned to each child
+            Note: The list is already creted so the saved values can be saved via the child_num as the index"""
         self.population = population
+        """The list of children (modifiers) for an epoch (2d list)"""
         self.size = size
+        """The size of the population (default 50)"""
         self.generation = generation
+        """The epoch generation (nice to have for saving data)"""
         self.max_mute = max_mute
+        """The max size that the mutation function will change a value"""
         self.norm_size = norm_size
+        """The sum total of the modifier list (default 1)"""
         self.set_seed(seed)
+        """The seed of the epoch because why not"""
 
     def gen_epoch(self, new_seed:int=None):
         """Create new epoch"""
+     
+        #region setup
         # create a new population of the next epoch
         new_population = []
-        
+
         # By default find a seed for the epoch
         self.set_seed(new_seed)
         
         # feel free to comment this line out
         random.seed(new_seed) 
+        
+        #endregion
         
         # If there is no current population then make one up
         if self.population is None:
@@ -62,8 +72,10 @@ class Trainer:
                 new_population.append(new_child)
             
             # If there was no population then stop when one is made
+            self.population = new_population
             return
         
+        #region parents
         # Find the best children to become parents
         fit_avg = sum(self.fitness) / len(self.fitness)
         index = [] # A list of the index for parents
@@ -76,10 +88,12 @@ class Trainer:
                 break
             if self.fitness[i] > fit_avg:
                 index.append(i)
-
+        #endregion
+        
         index_len = len(index)
+        assert index_len == len(self.fitness) // 2, f"oop {index_len} {len(self.fitness)}"
         # Start the Gen
-        for x in range(index_len // 2):
+        for x in range(index_len):
 
             i1 = 2 * x
             parent1 = self.population[i1]
@@ -87,7 +101,7 @@ class Trainer:
             new_population.append(parent1)
             # Stop if we reach the end of an odd length 
             # therefore there is not a second parent to cross breed with
-            if i1 is index_len:
+            if i1 >= index_len:
                 # I geuss just mutate the parent
                 modifier = self.mutate(parent1)
                 new_population.append(modifier)
@@ -119,6 +133,9 @@ class Trainer:
                 print("adding a child")
                 new_population.append(self.gen_mod_rand)    
         # Maybe put in a useless if statement to generate any missing (Shouldn't need but like idk)
+        
+        # Set the new population as the population
+        self.population = new_population
             
         return  # EOF
     
@@ -189,7 +206,7 @@ class Trainer:
         """Retrieve the modifiers of one of the children"""
         assert child_num < self.size, f"Tried to get a modifier from a child that does not exist: {child_num}"
 
-        return self.population[child_num]["modifier"]  # list of mod from population
+        return self.population[child_num]  # list of mod from population
     
     def get_seed(self):
         return self.seed
@@ -198,6 +215,7 @@ class Trainer:
         if seed == None:
             seed = self.gen_seed()
         self.seed = seed
+        random.seed(seed)
     
     def gen_seed(self):
         return random.randrange(1000,9999)
