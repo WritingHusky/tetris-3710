@@ -29,7 +29,7 @@ class Trainer:
     def __int__(self, generation:int=0, population:list=None, size=50, max_mute:float=0.1, norm_size:int=1, seed:int=None):
          # Set the variables to the varibles
         # Auto generate the fitness list
-        self.fitness = [] * size
+        self.fitness = [] 
         """The list of fitness scores assigned to each child
             Note: The list is already creted so the saved values can be saved via the child_num as the index"""
         self.population = population
@@ -208,7 +208,8 @@ class Trainer:
         if self.population is None:
             self.gen_epoch()
         
-        assert child_num < self.size, f"Tried to get a modifier from a child that does not exist: {child_num}"
+        if child_num > self.size:
+            self.gen_epoch()
 
         return self.population[child_num]  # list of mod from population
     
@@ -224,9 +225,10 @@ class Trainer:
     def gen_seed(self):
         return random.randrange(1000,9999)
 
-    def calc_fitness(self, child_num, score, cleared_lines, ):
+    def calc_fitness(self, score, cleared_lines):
         """fitness function: evaluate the result of a game and store the fitness value into the fitness list"""
-        fit_val = 1 # 
+        fit_val = score + 2*(cleared_lines**2)
+        self.fitness.append(fit_val)
 
     def get_best(self):
         """Retrieve the data for the best of this epoch to save
