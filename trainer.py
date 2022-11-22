@@ -118,7 +118,6 @@ class Trainer:
             new_population.append(modifier2)
         
         # if stopped only add one to the population
-          
         
         # Random check to ensure that the population is the correct size
         # I will comment out for testing to see if everything else works but this is a lazy band-aid if needed   
@@ -202,8 +201,12 @@ class Trainer:
         """Retrieve the epoch info list"""
         return self.population
 
-    def get_mods(self, child_num):
+    def get_mod(self, child_num):
         """Retrieve the modifiers of one of the children"""
+        
+        if self.population is None:
+            self.gen_epoch()
+        
         assert child_num < self.size, f"Tried to get a modifier from a child that does not exist: {child_num}"
 
         return self.population[child_num]  # list of mod from population
@@ -212,7 +215,7 @@ class Trainer:
         return self.seed
 
     def set_seed(self, seed:int = None):
-        if seed == None:
+        if seed is None:
             seed = self.gen_seed()
         self.seed = seed
         random.seed(seed)
