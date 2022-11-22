@@ -91,7 +91,8 @@ class Trainer:
         #endregion
         
         index_len = len(index)
-        assert index_len == len(self.fitness) // 2, f"oop {index_len} {len(self.fitness)}"
+        if (index_len == len(self.fitness) // 2) or (index_len == len(self.fitness) // 2 + 1): 
+            print(f"oop {index_len} {len(self.fitness)}")
         # Start the Gen
         for x in range(index_len):
 
