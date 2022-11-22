@@ -34,6 +34,9 @@ class Figure:
         self.type = random.randint(0, len(self.figures) - 1)
         self.color = random.randint(1, len(colors) - 1)
         self.rotation = 0
+    
+    def fig(self):
+        return self.figures[self.type]
 
     def image(self):
         return self.figures[self.type][self.rotation]
@@ -86,7 +89,7 @@ class Tetris:
         new_mods = self.trainer.get_mod(self.child_num)
         self.child_num += 1
         
-        ai_place = new_ai.find_best_place(self.field, self.figure, new_mods)
+        ai_place = new_ai.find_best_place(self.field, self.figure.fig(), new_mods)
         self.ai_rotate = ai_place[0]
         self.ai_x = ai_place[1][0]
         self.ai_y = ai_place[1][1]
@@ -222,10 +225,10 @@ while not done:
                 if event.key == pygame.K_ESCAPE:
                     game.__init__(20, 10)
 
-        # Stop going down if the key is released
-        if event.type == pygame.KEYUP:
-                if event.key == pygame.K_DOWN:
-                    pressing_down = False
+            # Stop going down if the key is released
+            if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_DOWN:
+                        pressing_down = False
     #endregion
     
     #region ai input
