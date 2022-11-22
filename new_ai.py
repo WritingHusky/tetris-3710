@@ -135,7 +135,7 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
     for rotation in range(numRotations):
         for position in validPositions[rotation]:
             # place position on playField
-            newPlayfield = place_on_playfield[playField, figure, position]
+            newPlayfield = place_on_playfield(playField, figure, position)
 
             aggHeight = aggregate_height(newPlayfield)
             numHoles = count_holes(newPlayfield, aggHeight)  
