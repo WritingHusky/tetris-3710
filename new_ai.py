@@ -115,17 +115,27 @@ def h_generate_positions(playField, figures):
     
     return validPositions
 
-def place_on_playfield(playField, figure, position):
+def place_on_playfield(oldPlayField, figure, rotation, position):
+
+    playField = oldPlayField.copy()
+
+    for i in range(4):
+        for j in range(4):
+            if i * 4 + j in figure[rotation]:
+                playField[i + position[0]][j + position[1]] = 2
+
+    #def image(self):
+    #    return figure[rotation]
 
     return playField
     
 
-def find_best_place (playField, figure, weights=None):  #weights to be passed to f()
+def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weights to be passed to f()
     """Function to evaluate the different possible positions and find the best according to the modifiers
         Returns the position of the best placement from a list of positions"""
     # takes data from generate_positions and returns the best position using f()
-    if weights is None:
-        weights = [0.25, 0.25, 0.25, 0.25]
+    #if weights is None:
+    #    weights = [0.25, 0.25, 0.25, 0.25]
     placements = []  
     
     # find all the valid places
@@ -154,7 +164,7 @@ def find_best_place (playField, figure, weights=None):  #weights to be passed to
     return  bestPlacement  # best place returned
 
 
-def f(aggHeight, numHoles, amtBumpy, completedLines, weights):
+def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.25]):
     """The evaluation function of a state
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
@@ -246,8 +256,9 @@ def bumpiness(playField):
         bumpiness[i] = abs(bumpiness[i] - bumpiness[i+1]) #finds delta of each column
         sum += bumpiness[i]
         i+=1
-    bumpiness[i] = sum/(len(bumpiness)-1) #provides the average bumpiness
-    return bumpiness
+    bumpiness[i] = sum #/(len(bumpiness)-1) #provides the average bumpiness
+    #return bumpiness
+    return sum
 
 def completed_lines(playField): 
     # 

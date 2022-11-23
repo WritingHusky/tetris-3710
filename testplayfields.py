@@ -91,8 +91,16 @@ numRotations = len(positions)
 print("Number of Rotations: ", numRotations)
 print(positions)
 
+amtBumpy = nai.bumpiness(playField1)
+print("Bumpiness :" , amtBumpy)
+
 completedLines1 = nai.completed_lines(playField1)
 print("Completed Lines: " , completedLines1)
 
-score = nai.f(aggHeight1, numHoles1, 3, completedLines1)
+score = nai.f(aggHeight1, numHoles1, amtBumpy, completedLines1)
 print("Score: ", score)
+
+newPlayfield = nai.place_on_playfield(playField1, figures[0], 1, [3,3])
+
+for row in newPlayfield:
+    print(row)
