@@ -8,131 +8,146 @@ def collision_check(playField, figure, xpos, ypos):
     #xpos and ypos are position of the figure on the playField
 
     intersection = False
+    intersectionType = "none"
 
     height = len(playField)
     width = len(playField[0])
 
+    #print("xpos:", xpos, "ypos:", ypos)
+    #print("height:", height, "width:", width)
+
     for i in range(4):
         for j in range(4):
             if i * 4 + j in figure:
-               if i + ypos > height - 1 or \
-                       j + xpos > width - 1 or \
-                       j + xpos < 0 or \
-                       playField[i + ypos][j + xpos] > 0:
-                   intersection = True
-    return intersection
+                if j + xpos > (width-1) or j + xpos < 0 :
+                    intersection = True
+                    intersectionType = "wall"
+                elif i + ypos > (height-1):
+                    intersection = True
+                    intersectionType = "floor"
+                elif playField[i + ypos][j + xpos] > 0:
+                    intersection = True
+                    intersectionType = "block"
+                    
+    return (intersection, intersectionType)
 
-def h_generate_positions(playField, figures):
-    """Generate all the possible positions that are possible
-        Returns a list of all the positions relative point (0,0)"""
-    # finds state space
-    # determines all potential final placements of the piece on the board
-
-    # do we really need to generate every last position possible, or can we just find the positions right before the collision occurs?
-
-    # start with rotation 1
-    # A. place piece at 0,0
-    # 1. test if collision
-    # 1a. If no collision, then add to list
-    # 1b. If collision, continue
-    # 2. move right
-    # 3. repeat 1-2 until we collide or hit the bottom
-    # B. if there's no more rotations, we're done
-    #   otherwise, switch to next rotation and repeat from A
-    # Heuristics: A piece cannot be suspended in mid-air.
-    #           We ignore those invalid positions.
+def h_generate_positions(playField, figure):
 
     fieldHeight = len(playField)
     fieldWidth = len(playField[0])
-    numRotations = len(figures)
-
     validPositions = []
-    currentValidPosition = []
-
-    r = 0
-    x = 0
-    y = 0
-
-    for r in range(numRotations):
-        validRotationPositions = []
-        for x in range(fieldWidth): #columns
-            for y in range(fieldHeight): #rows
-                if not (collision_check(playField, figures[r], x, y)) :
-                    currentValidPosition=[x,y]
-                else:
-                    if (currentValidPosition not in validRotationPositions):
-                        validRotationPositions.append(currentValidPosition)
-                    break
-
-        validPositions.append(validRotationPositions)
+    previousPosition = (None, None)
     
+    # x (column) starts at -1 and ends at the field size
+    for x in range(-1,fieldWidth): #columns
+        for y in range(0,fieldHeight): #rows
+            currentPosition=(x,y)
+            collisionTuple = collision_check(playField, figure, currentPosition[0], currentPosition[1])
+            collision = collisionTuple[0]
+            collisionType = collisionTuple[1]
+            print("currentPosition:", currentPosition, "collision:",collisionTuple)
+           
+            #what happens if you hit a block straight off and previousPosition is undefined?
+            
+            if (collision):
+                if (collisionType == 'block' or collisionType == "floor"):
+                    validPositions.append(previousPosition)
+                break
+            else:
+                previousPosition = currentPosition
+            previousPosition = currentPosition
+                
     return validPositions
 
-def place_on_playfield(oldPlayField, figure, rotation, position):
+def generate_all_positions(playField, figures):
+    allPositions = []
+    
+    for figure in figures:
+        print("Figure:", figure)
+        positions = h_generate_positions(playField, figure)
+        allPositions.append(copy.deepcopy(positions))
+    
+    return allPositions
+
+def place_on_playfield(oldPlayField, figure, position):
 
     newplayField = copy.deepcopy(oldPlayField)
+    #print ("figure: ", figure)
+    #print ("position:", position)
 
     for i in range(4):  # y (columns)
         for j in range(4): # x (rows)
-            if i * 4 + j in figure[rotation]:
+            if i * 4 + j in figure:
+                #print ("i: ", (i+position[1]), " j:", (j+position[0]))
                 newplayField[i + position[1]][j + position[0]] = 2
 
     return newplayField
     
 
-def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weights to be passed to f()
+def find_best_place (playField, figureR, weights=[0.25,0.25,0.25,0.25]):  #weights to be passed to f()
     """Function to evaluate the different possible positions and find the best according to the modifiers
         Returns the position of the best placement from a list of positions"""
     # takes data from generate_positions and returns the best position using f()
     #if weights is None:
     #    weights = [0.25, 0.25, 0.25, 0.25]
     placements = []  
+        
+    print ("Weights: ", weights)
     
     # find all the valid places
-    validPositions = h_generate_positions(playField, figure)
+    validPositions = generate_all_positions(playField, figureR)
     
+    print("Valid Positions returned to fbp: ", validPositions)
+
+    if validPositions == []:
+        print("no valid positions")
+        return [-1,-1]
+
     # iterate through the validPositions list. deal with each rotations separately.
+
+    # need to deal with an empty set as well. probably use an "if" statement
+
     numRotations = len(validPositions)
     for rotation in range(numRotations):
         for position in validPositions[rotation]:
+            figure = figureR[rotation]
+            
+            #print("position:", position, "rotation:", rotation, "numRotations", numRotations)
+            if position != (None, None):
+                newPlayfield = place_on_playfield(playField, figure, position)
+            
+                '''
+                print("newPlayField")
+                for row in newPlayfield:
+                    print(row)
+                '''
+                
+                aggHeight = aggregate_height(newPlayfield)
+                numHoles = count_holes(newPlayfield, aggHeight)  
+                amtBumpy = bumpiness(newPlayfield)
+                completedLines = completed_lines(newPlayfield)
 
-            # place position on playField
-            newPlayfield = place_on_playfield(playField, figure, rotation, position)
-            #playField is being modified in the line above for some reason.
-            '''
-            print("playField")
-            for row in playField:
-                print(row)
+                placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights) 
 
-            print("newPlayField")
-            for row in newPlayfield:
-                print(row)
-            '''
-            aggHeight = aggregate_height(newPlayfield)
-            numHoles = count_holes(newPlayfield, aggHeight)  
-            amtBumpy = bumpiness(newPlayfield)
-            completedLines = completed_lines(newPlayfield)
-
-            # call f() to determine the "score" of the placement            
-            placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights) 
-
-            placement = [rotation, position]
-            placements.append([placementScore, placement])
+                placement = [rotation, position]
+                placements.append([placementScore, placement])
 
     # find the best (lowest) scoring placement and return that
+
+    # Can you believe that there is a case that there are NO valid positions?
+    if placements == []:
+        return [0,(3,0)]
 
     bestPlacement = placements[0][1]
     bestScore = placements[0][0]
 
     for placement in placements:
-        #print ("placement: ", placement)
         if (placement[0] < bestScore):
             bestPlacement = placement[1]  # [r,[x,y]]
             bestScore = placement[0]
-            #print("    bestPlacement changed. bestscore: ", bestScore)
 
-    print("Best score+placement: " , placement, " Returning: ", bestPlacement)
-
+    #print("Best score+placement: " , placement, " Returning: ", bestPlacement)
+    print("ah:", aggHeight, "ho:", numHoles, "bu:", amtBumpy, "cl:", completedLines, "sc:", placementScore)
     return  bestPlacement  # best place returned
 
 
@@ -141,7 +156,7 @@ def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.2
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
 
-    score = (aggHeight * weights[0]) + (numHoles * weights[1]) + (amtBumpy * weights[2]) + ( (4 - completedLines) * weights[3])
+    score = (aggHeight * weights[0]) + (numHoles * weights[1]) + (amtBumpy * weights[2]) + ( 2**(4 - completedLines) * weights[3])
 
     return score
 
