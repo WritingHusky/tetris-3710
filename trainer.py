@@ -227,7 +227,7 @@ class Trainer:
         
         best_fit:int = max(self.fitness) # The fitness score of the best child    
         best_index = self.fitness.index(best_fit) # The index of the best child  
-        best_mod:list = self.population # The modifiers of the best child
+        best_mod:list = self.population[best_index] # The modifiers of the best child
         
         return {
             "seed":self.seed,
