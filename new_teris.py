@@ -157,13 +157,15 @@ class Tetris:
 
 # Initalize the trainer
 class Trainer:
-    def __init__(self):
-        epoch_size = 20 # Number of indiviuals per epoche
-        max_mutation = 0.1 # The max amount that mutation will change a value
+    
+    epoch_size = 20 # Number of indiviuals per epoche
+    max_mutation = 0.1 # The max amount that mutation will change a value
+    
+    def __init__(self):    
         seed = random.randrange(1000, 9999)# If we want to controll randomness
         self.trainer = trainer.Trainer()
-        self.trainer.size = epoch_size
-        self.trainer.max_mute = max_mutation
+        self.trainer.size = self.epoch_size
+        self.trainer.max_mute = self.max_mutation
         self.trainer.set_seed(seed)
         
         # Keep track of what number this is in the order
@@ -259,6 +261,23 @@ while not done:
         # Log info about the game and do the post game analysis
         print(f"saving child {train.child_num}: mod{game.weights}")
         train.trainer.calc_fitness( game.score, game.cleared_lines)
+        
+        if train.child_num == 20:
+            # Save the data for the best of each generation.
+            save_data = train.trainer.get_best()
+            
+            # Save data is a dictonary formated as such:
+            # {
+            # "seed":(4 digit int),
+            # "modifiers":[a,b,c,d],
+            # "child number":(int),
+            # "generation":(int)
+            # } 
+            
+            # Saving code Here 
+            
+            
+        
         # Update the modifers
         game.weights = train.trainer.get_mod(train.child_num-1)
         train.child_num = train.child_num % 20 + 1
@@ -296,6 +315,12 @@ while not done:
     text_game_over = font1.render("Game Over", True, (255, 125, 0))
     text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
 
+    # Add custom text that includes:
+    # generation number                 = train.trainer.generation
+    # Child number within generation    = train.child_num and train.epoch_size
+    # The current modifers              = game.weights
+    
+    
     screen.blit(text, [150, 0])
     if game.state == "gameover":
         screen.blit(text_game_over, [20, 200])
