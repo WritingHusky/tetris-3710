@@ -156,8 +156,8 @@ def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.2
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
 
-    score = (aggHeight * weights[0]) + (numHoles * weights[1]) + (amtBumpy * weights[2]) + ( 2**(4 - completedLines) * weights[3])
-
+    #score = (aggHeight * weights[0]) + (numHoles * weights[1]) + (amtBumpy * weights[2]) + ( 2**(4 - completedLines) * weights[3])
+    score = ((aggHeight**3) * weights[0]) + ((numHoles**4) * weights[1]) + ((amtBumpy**2) * weights[2]) + ( 4**(4 - completedLines) * weights[3])
     return score
 
 
@@ -240,7 +240,7 @@ def bumpiness(playField):
                 break
     i = 0
     while i < len(bumpiness)-1:
-        bumpiness[i] = abs(bumpiness[i] - bumpiness[i+1]) #finds delta of each column
+        bumpiness[i] = 3**(abs(bumpiness[i] - bumpiness[i+1])) #finds delta of each column
         sum += bumpiness[i]
         i+=1
     #bumpiness[i] = sum #/(len(bumpiness)-1) #provides the average bumpiness
