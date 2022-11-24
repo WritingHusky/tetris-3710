@@ -1,5 +1,5 @@
 import random as random
-
+import statistics
 
 class Trainer:
     """Class to interface with the tetris game
@@ -47,97 +47,91 @@ class Trainer:
 
     def gen_epoch(self, new_seed:int=None):
         """Create new epoch"""
-     
-        #region setup
+
         # create a new population of the next epoch
         new_population = []
 
         # By default find a seed for the epoch
-        self.set_seed(new_seed)
-        
-        # feel free to comment this line out
-        random.seed(new_seed) 
-        
-        #endregion
+        self.set_seed(new_seed)               
         
         # If there is no current population then make one up
         if self.population is None:
-            # for the size of the population
             for i in range(self.size):
                 
                 # create a new child
-                new_child = self.gen_mod_rand()
+                new_ephoc = self.gen_mod_rand()
             
                 # add the child to the population
-                new_population.append(new_child)
-            
+                new_population.append(new_ephoc)
+                
             # If there was no population then stop when one is made
             self.population = new_population
             return
+                
+        # Step 1. Find the best children to become parents
         
-        #region parents
-        # Find the best children to become parents
-        fit_avg = sum(self.fitness) / len(self.fitness)
-        index = [] # A list of the index for parents
+        # Find the meadian of the fitness list
+        fit_mid = statistics.median(self.fitness)
+        parents = [] # A list of the index for parents
         
         # Find all the best parents
         for i in range(len(self.fitness)):
-            # Check to make sure that we don't go over half the population size
+            # Check to make sure that we don't go over the population size
             if i > self.size:
                 # Stop if you go over
                 break
-            if self.fitness[i] > fit_avg:
-                index.append(i)
-        #endregion
+            if self.fitness[i] > fit_mid:
+                parents.append(i)
         
-        index_len = len(index)
-        if (index_len == len(self.fitness) // 2) or (index_len == len(self.fitness) // 2 + 1): 
-            print(f"oop {index_len} {len(self.fitness)}")
-        # Start the Gen
-        for x in range(index_len):
-
-            i1 = 2 * x
-            parent1 = self.population[i1]
-            # add the parent back into the population
-            new_population.append(parent1)
-            # Stop if we reach the end of an odd length 
-            # therefore there is not a second parent to cross breed with
-            if i1 >= index_len:
-                # I geuss just mutate the parent
-                modifier = self.mutate(parent1)
-                new_population.append(modifier)
-                break
-
-            i2 = i1 + 1
-            parent2 = self.population[i2]
-
-            # Cross-breed (includes mutation and normalizing) children
-            modifier1, modifier2 = self.cross_breed(parent1, parent2)
+        # This is the list where we will add the new modifiers to
+        new_ephoc = []
+        
+        parents_len = len(parents)
+        # Make the pairs of parents for cross breeding
+        for i in range(parents_len):
             
-            # Add the children to the population
-            new_population.append(modifier1)
-            new_population.append(modifier2)
-        
-        # if stopped only add one to the population
-        
-        # Random check to ensure that the population is the correct size
-        # I will comment out for testing to see if everything else works but this is a lazy band-aid if needed   
-        if not len(new_population) == self.size:
-            print(f"The size of the population did not generate correctly: {len(new_population)} created of max {self.size} \n oops :(")
+            # Every parent will be cross breed with there index+1 neighbor
+            i1 = i
+            i2 = i + 1
+            parent1 = self.population[i1]
+            
+            # If the parent pair is outside index of the parent list pair with the first parent
+            if i2 >= parents_len:
+                parent2 = self.population[0]
+            else:
+                parent2 = self.population[i2]
+            
+            # Cross breed
+            new_weights = self.cross_breed(parent1, parent2)
+            
+            # Add both new weights to the set of 
+            new_ephoc.append(new_weights[0])
+            new_ephoc.append(new_weights[1])
 
-            while len(new_population) > self.size:
-                print("removing a child")
-                new_population.pop()
+        # The new_ephoc should be the same size as the pervious but incase we need to adjust       
+        if not len(new_ephoc) == self.size:
+            #print(f"The size of the population did not generate correctly: {len(new_ephoc)} created of max {self.size} \n oops :(")
+
+            while len(new_ephoc) > self.size:
+                #print("removing a child")
+                new_ephoc.pop()
                 
-            while len(new_population) < self.size:
-                print("adding a child")
-                new_population.append(self.gen_mod_rand)    
-        # Maybe put in a useless if statement to generate any missing (Shouldn't need but like idk)
+            while len(new_ephoc) < self.size:
+                #print("adding a child")
+                new_ephoc.append(self.gen_mod_rand)    
+
+        
+        # Mutate and normalize the entire generation
+        for x in new_ephoc:
+            x = self.mutate(x)
+            x = self.normalize(x)
+            new_population.append(x)
+        
         
         # Set the new population as the population
         self.population = new_population
             
-        return  # EOF
+        return  # End
     
     def cross_breed(self, parent_mod1:list, parent_mod2:list):
         """Take the two parent modifiers and cross-breed them to get 2 new modifiers
@@ -146,11 +140,7 @@ class Trainer:
         assert len(parent_mod1) == 4 and len(parent_mod2) == 4, f"Cannot cross breed modifiers that are invalid length: {parent_mod1} & {parent_mod2}"
         
         new_mod1 = [parent_mod1[0], parent_mod1[1], parent_mod2[2], parent_mod2[3]]
-        new_mod2 = [parent_mod2[0], parent_mod2[1], parent_mod1[2], parent_mod1[3]]
-        
-        # Then mutate the children for diversity
-        new_mod1 = self.mutate(new_mod1)
-        new_mod2 = self.mutate(new_mod2)   
+        new_mod2 = [parent_mod2[0], parent_mod2[1], parent_mod1[2], parent_mod1[3]]  
         
         # Then normalize the modifiers to have a sum of 1
         new_mod1 = self.normalize(new_mod1)
@@ -176,9 +166,8 @@ class Trainer:
             Note: if the sum is 0 a new vector is created"""
         total = sum(v)
         
-        # Catch the possiblity that the vector if the 0 vector
-        # This could affect the evaluation function
-        if total == 0:
+        # Catch the possiblity that the vector sums to 0 to catch divide by 0 error
+        while not total == 0:
             v = self.gen_mod_rand()
             total = sum(v)
         
