@@ -259,7 +259,7 @@ while not done:
     # If the round ends (can move to after the drawing of the screen maybe)
     if game.state == "roundover":
         # Log info about the game and do the post game analysis
-        print(f"saving child {train.child_num}: mod{game.weights}")
+        print(f"score: {game.score} saving child {train.child_num}: mod{game.weights}")
         train.trainer.calc_fitness( game.score, game.cleared_lines)
         
         if train.child_num == 20:

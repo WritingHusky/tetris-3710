@@ -147,7 +147,7 @@ def find_best_place (playField, figureR, weights=[0.25,0.25,0.25,0.25]):  #weigh
             bestScore = placement[0]
 
     #print("Best score+placement: " , placement, " Returning: ", bestPlacement)
-    print("ah:", aggHeight, "ho:", numHoles, "bu:", amtBumpy, "cl:", completedLines, "sc:", placementScore)
+    #print("ah:", aggHeight, "ho:", numHoles, "bu:", amtBumpy, "cl:", completedLines, "sc:", placementScore)
     return  bestPlacement  # best place returned
 
 
