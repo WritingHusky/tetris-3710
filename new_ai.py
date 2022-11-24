@@ -72,8 +72,8 @@ def place_on_playfield(oldPlayField, figure, rotation, position):
 
     newplayField = copy.deepcopy(oldPlayField)
 
-    for i in range(4):
-        for j in range(4):
+    for i in range(4):  # y (columns)
+        for j in range(4): # x (rows)
             if i * 4 + j in figure[rotation]:
                 newplayField[i + position[1]][j + position[0]] = 2
 
@@ -121,8 +121,8 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
 
     # find the best (lowest) scoring placement and return that
 
-    bestPlacement = placements[1]
-    bestScore = bestPlacement[0]
+    bestPlacement = placements[0][1]
+    bestScore = placements[0][0]
 
     for placement in placements:
         #print ("placement: ", placement)
@@ -131,7 +131,7 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
             bestScore = placement[0]
             #print("    bestPlacement changed. bestscore: ", bestScore)
 
-    print("Best Placement: ", placement)
+    print("Best score+placement: " , placement, " Returning: ", bestPlacement)
 
     return  bestPlacement  # best place returned
 
