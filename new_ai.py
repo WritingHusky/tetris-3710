@@ -45,7 +45,7 @@ def h_generate_positions(playField, figure):
             collisionTuple = collision_check(playField, figure, currentPosition[0], currentPosition[1])
             collision = collisionTuple[0]
             collisionType = collisionTuple[1]
-            print("currentPosition:", currentPosition, "collision:",collisionTuple)
+            #print("currentPosition:", currentPosition, "collision:",collisionTuple)
            
             #what happens if you hit a block straight off and previousPosition is undefined?
             
@@ -63,7 +63,7 @@ def generate_all_positions(playField, figures):
     allPositions = []
     
     for figure in figures:
-        print("Figure:", figure)
+        #print("Figure:", figure)
         positions = h_generate_positions(playField, figure)
         allPositions.append(copy.deepcopy(positions))
     
@@ -92,15 +92,15 @@ def find_best_place (playField, figureR, weights=[0.25,0.25,0.25,0.25]):  #weigh
     #    weights = [0.25, 0.25, 0.25, 0.25]
     placements = []  
         
-    print ("Weights: ", weights)
+    #print ("Weights: ", weights)
     
     # find all the valid places
     validPositions = generate_all_positions(playField, figureR)
     
-    print("Valid Positions returned to fbp: ", validPositions)
+    #print("Valid Positions returned to fbp: ", validPositions)
 
     if validPositions == []:
-        print("no valid positions")
+        #print("no valid positions")
         return [-1,-1]
 
     # iterate through the validPositions list. deal with each rotations separately.
