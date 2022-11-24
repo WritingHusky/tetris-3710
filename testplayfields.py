@@ -1,5 +1,16 @@
 import new_ai as nai
 
+
+figures = [
+    [[1, 5, 9, 13], [4, 5, 6, 7]],
+    [[4, 5, 9, 10], [2, 6, 5, 9]],
+    [[6, 7, 9, 10], [1, 5, 6, 10]],
+    [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 9, 8], [4, 5, 6, 10]],
+    [[1, 2, 6, 10], [5, 6, 7, 9], [2, 6, 10, 11], [3, 5, 6, 7]],
+    [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]],
+    [[1, 2, 5, 6]],
+]
+
 # aggregate height = 11 + 8 + 3 + 3 + 3 + 6 + 4 + 4 + 4 + 4 = 50
 # holes = 1 + 1 + 1 + 1 + 1 + 1 = 6
 # completed lines = 0
@@ -54,53 +65,64 @@ playField2 = [
     [1,1,1,1,1,0,0,0,1,1]
 ]
 
-testPiece = [1, 5, 8, 9]
-testPosition = [5,5]
-
-aggHeight1 = nai.aggregate_height(playField1)
-numHoles1 = nai.count_holes(playField1)
-
-print("Aggregate Height: ", aggHeight1)
-print("Number of Holes: ", numHoles1)
-
-aggHeight2 = nai.aggregate_height(playField2)
-numHoles2 = nai.count_holes(playField2 , aggHeight2)
-
-print("Aggregate Height: ", aggHeight2)
-print("Number of Holes: ", numHoles2)
-
-'''
-#testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
-testCollision = nai.collision_check(playField1, testPiece, testPosition[0], testPosition[1])
-print("Collision? :", testCollision) 
-'''
-
-figures = [
-    [[1, 5, 9, 13], [4, 5, 6, 7]],
-    [[4, 5, 9, 10], [2, 6, 5, 9]],
-    [[6, 7, 9, 10], [1, 5, 6, 10]],
-    [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 9, 8], [4, 5, 6, 10]],
-    [[1, 2, 6, 10], [5, 6, 7, 9], [2, 6, 10, 11], [3, 5, 6, 7]],
-    [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]],
-    [[1, 2, 5, 6]],
+playField3 = [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,1,1,1,1,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,0,0,0,1,1,1,1,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,0,0,0,1,1,1,1,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,0,0,0,1,1,1,1,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1],
+    [1,1,1,1,1,0,0,0,1,1]
 ]
 
-figure = figures[0]
-positions = nai.h_generate_positions(playField2, figure)
-numRotations = len(positions)
-print("Number of Rotations: ", numRotations)
-print(positions)
+fieldInPlay = playField1
+figure = figures[3]
 
-amtBumpy = nai.bumpiness(playField1)
-print("Bumpiness :" , amtBumpy)
+for row in fieldInPlay:
+    print(row)
 
-completedLines1 = nai.completed_lines(playField1)
-print("Completed Lines: " , completedLines1)
+bestPlace = nai.find_best_place(fieldInPlay, figure)
+print ("Best Position [r,[x,y]]: ", bestPlace)
 
-score = nai.f(aggHeight1, numHoles1, amtBumpy, completedLines1)
-print("Score: ", score)
+print("figure: ", figure)
+print("rotation: ", bestPlace[0])
+print("position: ", bestPlace[1])
 
-newPlayfield = nai.place_on_playfield(playField1, figures[0], 1, [3,3])
+newPlayfield = nai.place_on_playfield(fieldInPlay, figure, bestPlace[0], bestPlace[1])
 
+print ("NewplayField")
 for row in newPlayfield:
     print(row)
+
+aggHeight = nai.aggregate_height(newPlayfield)
+numHoles  = nai.count_holes(newPlayfield)
+
+print("Aggregate Height: ", aggHeight)
+print("Number of Holes: ", numHoles)
+
+positions = nai.h_generate_positions(newPlayfield, figure)
+numRotations = len(positions)
+print("Number of Rotations: ", numRotations)
+print("Positions: ", positions)
+
+amtBumpy = nai.bumpiness(newPlayfield)
+print("Bumpiness :" , amtBumpy)
+
+completedLines = nai.completed_lines(newPlayfield)
+print("Completed Lines: " , completedLines)
+
+score = nai.f(aggHeight, numHoles, amtBumpy, completedLines)
+print("Score: ", score)

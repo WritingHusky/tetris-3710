@@ -1,53 +1,7 @@
 from re import I
 from syslog import LOG_LOCAL0
+import copy
 #from tetris import Figure
-
-def generate_positions(playField, figures):
-    """Generate all the possible positions that are possible
-        Returns a list of all the positions relative point (0,0)"""
-    # finds state space 
-    # determines all potential final placements of the piece on the board
-
-    # do we really need to generate every last position possible, or can we just find the positions right before the collision occurs?
-
-    # start with rotation 1
-    # A. place piece at 0,0
-    # 1. test if collision
-    # 1a. If no collision, then add to list
-    # 1b. If collision, continue
-    # 2. move right
-    # 3. repeat 1-2 until we collide or hit the bottom
-    # B. if there's no more rotations, we're done
-    #   otherwise, switch to next rotation and repeat from A
-
-    # deficiencies:
-    # will place a piece into holes when they are large enough. how do we deal with this?
-    # Go down then right instead. 
-    # When we collide on the way down, finish that column and move right.
-
-    fieldHeight = len(playField)
-    fieldWidth = len(playField[0])
-    numRotations = len(figures)
-
-    Positions = []
-
-    r = 0
-    x = 0
-    y = 0
-
-    for r in range(numRotations):
-        RotationPositions = []
-        for x in range(fieldWidth): #columns
-            
-            for y in range(fieldHeight): #rows
-                if not (collision_check(playField, figures[r], x, y)) :
-                    RotationPositions.append([x,y])
-                else:
-                    break
-        Positions.append(RotationPositions)
-    
-    return Positions
-
 
 def collision_check(playField, figure, xpos, ypos): 
     #copied code from tetris.py and modified it (changed variable names) for our use.
@@ -102,7 +56,6 @@ def h_generate_positions(playField, figures):
     for r in range(numRotations):
         validRotationPositions = []
         for x in range(fieldWidth): #columns
-            
             for y in range(fieldHeight): #rows
                 if not (collision_check(playField, figures[r], x, y)) :
                     currentValidPosition=[x,y]
@@ -117,17 +70,14 @@ def h_generate_positions(playField, figures):
 
 def place_on_playfield(oldPlayField, figure, rotation, position):
 
-    playField = oldPlayField.copy()
+    newplayField = copy.deepcopy(oldPlayField)
 
     for i in range(4):
         for j in range(4):
             if i * 4 + j in figure[rotation]:
-                playField[i + position[0]][j + position[1]] = 2
+                newplayField[i + position[1]][j + position[0]] = 2
 
-    #def image(self):
-    #    return figure[rotation]
-
-    return playField
+    return newplayField
     
 
 def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weights to be passed to f()
@@ -145,9 +95,19 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
     numRotations = len(validPositions)
     for rotation in range(numRotations):
         for position in validPositions[rotation]:
-            # place position on playField
-            newPlayfield = place_on_playfield(playField, figure, position)
 
+            # place position on playField
+            newPlayfield = place_on_playfield(playField, figure, rotation, position)
+            #playField is being modified in the line above for some reason.
+            '''
+            print("playField")
+            for row in playField:
+                print(row)
+
+            print("newPlayField")
+            for row in newPlayfield:
+                print(row)
+            '''
             aggHeight = aggregate_height(newPlayfield)
             numHoles = count_holes(newPlayfield, aggHeight)  
             amtBumpy = bumpiness(newPlayfield)
@@ -155,11 +115,23 @@ def find_best_place (playField, figure, weights=[0.25,0.25,0.25,0.25]):  #weight
 
             # call f() to determine the "score" of the placement            
             placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights) 
-            placement = [position, rotation]
+
+            placement = [rotation, position]
             placements.append([placementScore, placement])
 
     # find the best (lowest) scoring placement and return that
-    bestPlacement = [rotation,position]  # [r,[x,y]]
+
+    bestPlacement = placements[1]
+    bestScore = bestPlacement[0]
+
+    for placement in placements:
+        #print ("placement: ", placement)
+        if (placement[0] < bestScore):
+            bestPlacement = placement[1]  # [r,[x,y]]
+            bestScore = placement[0]
+            #print("    bestPlacement changed. bestscore: ", bestScore)
+
+    print("Best Placement: ", placement)
 
     return  bestPlacement  # best place returned
 
@@ -248,7 +220,7 @@ def bumpiness(playField):
     
     for i in range(numCols):
         for j in range(numRows):
-            if(playField[j][i] == 1):
+            if(playField[j][i] != 0): # corrected this line. 0 indicates empty. a full space can be 1 through 9
                 bumpiness[i] = numRows - j #gets the position of the highest point of each column
                 break
     i = 0
@@ -256,7 +228,8 @@ def bumpiness(playField):
         bumpiness[i] = abs(bumpiness[i] - bumpiness[i+1]) #finds delta of each column
         sum += bumpiness[i]
         i+=1
-    bumpiness[i] = sum #/(len(bumpiness)-1) #provides the average bumpiness
+    #bumpiness[i] = sum #/(len(bumpiness)-1) #provides the average bumpiness
+    #print ("bumpiness: ", bumpiness)
     #return bumpiness
     return sum
 
