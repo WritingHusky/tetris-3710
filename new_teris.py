@@ -74,7 +74,7 @@ class Tetris:
             
 
     # reset the pos of the falling pieces
-    def new_figure(self):
+    def new_figure(self): 
         self.figure = Figure(3, 0)
         
         # find the best place for the figure
@@ -283,7 +283,9 @@ while not done:
         # Update the modifers
         game.weights = train.trainer.get_mod(train.child_num-1)
         train.child_num = train.child_num % 20 + 1
-
+        
+        # Fix the seed so the piece order should not change
+        random.seed(train.trainer.get_seed())
         
         # When done with everthing that restart the game and continue again
         game.__init__(20, 10)
