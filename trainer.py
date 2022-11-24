@@ -167,7 +167,7 @@ class Trainer:
         total = sum(v)
         
         # Catch the possiblity that the vector sums to 0 to catch divide by 0 error
-        while not total == 0:
+        while total == 0:
             v = self.gen_mod_rand()
             total = sum(v)
         
