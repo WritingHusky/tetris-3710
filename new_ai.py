@@ -240,9 +240,10 @@ def bumpiness(playField):
                 break
     i = 0
     while i < len(bumpiness)-1:
-        bumpiness[i] = 3**(abs(bumpiness[i] - bumpiness[i+1])) #finds delta of each column
+        bumpiness[i] = (abs(bumpiness[i] - bumpiness[i+1]))**2 #finds delta of each column
         sum += bumpiness[i]
         i+=1
+    
     #bumpiness[i] = sum #/(len(bumpiness)-1) #provides the average bumpiness
     #print ("bumpiness: ", bumpiness)
     #return bumpiness
