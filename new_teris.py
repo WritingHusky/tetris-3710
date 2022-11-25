@@ -277,7 +277,7 @@ while not done:
             # Saving code Here 
             
             # Then Generate a new set of weights to use
-            train.trainer.gen_ephoc()
+            train.trainer.gen_epoch()
             
         
         # Update the modifers
