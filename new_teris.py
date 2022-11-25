@@ -304,7 +304,8 @@ while not done:
             break
 
         # Log info about the game and do the post game analysis
-        print(f"score: {game.score} saving child {train.child_num}: mod{game.weights}")
+        # commented out for simpler output for longer tests
+        # print(f"score: {game.score} saving child {train.child_num}: mod{game.weights}")
         train.trainer.calc_fitness(game.score)
 
         if train.child_num == 20:
@@ -321,7 +322,7 @@ while not done:
             # }
 
             # Saving code Here
-
+            print(f"generation: {train.trainer.generation} \n{save_data}")
             # Then Generate a new set of weights to use
             train.trainer.gen_epoch()
 
