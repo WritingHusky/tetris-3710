@@ -48,6 +48,7 @@ class Trainer:
     def gen_epoch(self, new_seed:int=None):
         """Create new epoch"""
 
+        self.generation += 1
         # create a new population of the next epoch
         new_population = []
 
@@ -214,10 +215,9 @@ class Trainer:
     def gen_seed(self):
         return random.randrange(1000,9999)
 
-    def calc_fitness(self, score, cleared_lines):
+    def calc_fitness(self, score):
         """fitness function: evaluate the result of a game and store the fitness value into the fitness list"""
-        fit_val = score + 2*(cleared_lines**2)
-        self.fitness.append(fit_val)
+        self.fitness.append(score)
 
     def get_best(self):
         """Retrieve the data for the best of this epoch to save
@@ -232,6 +232,7 @@ class Trainer:
         return {
             "seed":self.seed,
             "modifiers":best_mod,
+            "score":best_fit,
             "child number":best_index,
             "generation":self.generation
             }

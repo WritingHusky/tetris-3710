@@ -34,7 +34,7 @@ class Figure:
         self.type = random.randint(0, len(self.figures) - 1)
         self.color = random.randint(1, len(colors) - 1)
         self.rotation = 0
-    
+
     def fig(self):
         return self.figures[self.type]
 
@@ -71,12 +71,11 @@ class Tetris:
             for j in range(width):
                 new_line.append(0)
             self.field.append(new_line)
-            
 
     # reset the pos of the falling pieces
-    def new_figure(self): 
+    def new_figure(self):
         self.figure = Figure(3, 0)
-        
+
         # find the best place for the figure
         ai_place = new_ai.find_best_place(self.field, self.figure.fig(), weights=self.weights)
         self.ai_rotate = ai_place[0]
@@ -139,7 +138,6 @@ class Tetris:
             self.state = "gameover"
             if player == "ai":
                 self.state = "roundover"
-            
 
     # move the falling piece by dx
     def go_side(self, dx):
@@ -155,22 +153,57 @@ class Tetris:
         if self.intersects():
             self.figure.rotation = old_rotation
 
+
 # Initalize the trainer
 class Trainer:
-    
-    epoch_size = 20 # Number of indiviuals per epoche
-    max_mutation = 0.1 # The max amount that mutation will change a value
-    
-    def __init__(self):    
-        seed = random.randrange(1000, 9999)# If we want to controll randomness
+    epoch_size = 20  # Number of indiviuals per epoche
+    max_mutation = 0.1  # The max amount that mutation will change a value
+
+    def __init__(self):
+        seed = random.randrange(1000, 9999)  # If we want to controll randomness
         self.trainer = trainer.Trainer()
         self.trainer.size = self.epoch_size
         self.trainer.max_mute = self.max_mutation
         self.trainer.set_seed(seed)
-        
+
         # Keep track of what number this is in the order
         self.child_num = 1
-        
+
+
+game = Tetris(20, 10)
+player = "ai"
+
+# Initialize the trainer
+train = Trainer()
+
+# Start up info
+start_up = False
+replay = False
+classic_move = False
+if start_up:
+    player_choice = False
+    custom_ai = True
+
+    if player_choice:
+        player_ai = input("Would you like to play yourself? [Y/N]")
+        if player_ai == "Y":
+            player = "user"
+        else:
+            player = "ai"
+
+    if custom_ai:
+        train.trainer.set_seed(int(input("Enter the seed")))
+        new_weights = []
+        for i in range(4):
+            new_weights.append(float(input(f"enter wieght {i}")))
+        game.weights = new_weights
+        replay = True
+
+        if input("would like classic movement? [Y/N]") == "Y":
+            classic_move = True
+
+        buff = input("Ready to begin?")
+
 # Initialize the game engine
 pygame.init()
 
@@ -189,23 +222,19 @@ pygame.display.set_caption("Tetris")
 done = False
 clock = pygame.time.Clock()
 fps = 25
-game = Tetris(20, 10)
+
 counter = 0
 
 pressing_down = False
-player = "ai"
-
-# Initialize the trainer
-train = Trainer()
 
 while not done:
     # Create figure if there is none
     if game.figure is None:
         game.new_figure()
 
-    #region user input
+    # region user input
     if player == "user":
-        
+
         # Counter to limit the speed of the game
         counter += 1
         if counter > 100000:
@@ -215,7 +244,7 @@ while not done:
         if counter % (fps // game.level // 2) == 0 or pressing_down:
             if game.state == "start":
                 game.go_down()
-                
+
         # Listen for input from user
         for event in list(pygame.event.get()):
             if event.type == pygame.QUIT:
@@ -236,63 +265,79 @@ while not done:
 
             # Stop going down if the key is released
             if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_DOWN:
-                        pressing_down = False
-    #endregion
-    
-    #region ai input
-    if player == "ai":
+                if event.key == pygame.K_DOWN:
+                    pressing_down = False
+    # endregion
+
+    # region ai input
+    if player == "ai" and not classic_move:
         # Put the piece where it should go
         game.figure.rotation = game.ai_rotate
         game.figure.x = game.ai_x
         game.figure.y = game.ai_y
-        
+
         for event in list(pygame.event.get()):
             if event.type == pygame.QUIT:
                 done = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    game.__init__(20, 10)
         game.freeze()
-    #endregion
-    
+    elif player == "ai" and classic_move:
+        if not game.figure.rotation == game.ai_rotate:
+            game.rotate()
+        elif game.figure.x > game.ai_x:
+            game.go_side(-1)
+        elif game.figure.x < game.ai_x:
+            game.go_side(1)
+        else:
+            game.go_space()
+        for event in list(pygame.event.get()):
+            if event.type == pygame.QUIT:
+                done = True
+
+    # endregion
+
     # If the round ends (can move to after the drawing of the screen maybe)
     if game.state == "roundover":
+
+        # Only play the one round
+        if replay:
+            done = True
+            break
+
         # Log info about the game and do the post game analysis
-        print(f"score: {game.score} saving child {train.child_num}: mod{game.weights}")
-        train.trainer.calc_fitness( game.score, game.cleared_lines)
-        
+        # commented out for simpler output for longer tests
+        # print(f"score: {game.score} saving child {train.child_num}: mod{game.weights}")
+        train.trainer.calc_fitness(game.score)
+
         if train.child_num == 20:
             # Save the data for the best of each generation.
             save_data = train.trainer.get_best()
-            
+
             # Save data is a dictonary formated as such:
             # {
-            # "seed":(4 digit int),
-            # "modifiers":[a,b,c,d],
-            # "child number":(int),
-            # "generation":(int)
-            # } 
-            
-            # Saving code Here 
-            
+            # "seed":self.seed,
+            # "modifiers":best_mod,
+            # "score":best_fit,
+            # "child number":best_index,
+            # "generation":self.generation
+            # }
+
+            # Saving code Here
+            print(f"generation: {train.trainer.generation} \n{save_data}")
             # Then Generate a new set of weights to use
             train.trainer.gen_epoch()
-            
-        
+
         # Update the modifers
-        game.weights = train.trainer.get_mod(train.child_num-1)
+        game.weights = train.trainer.get_mod(train.child_num - 1)
         train.child_num = train.child_num % 20 + 1
-        
+
         # Fix the seed so the piece order should not change
         random.seed(train.trainer.get_seed())
-        
+
         # When done with everthing that restart the game and continue again
         game.__init__(20, 10)
         game.figure = None
-        
-    
-# Drawing the screen:
+
+    # Drawing the screen:
     screen.fill(WHITE)
 
     #
@@ -323,8 +368,7 @@ while not done:
     # generation number                 = train.trainer.generation
     # Child number within generation    = train.child_num and train.epoch_size
     # The current modifers              = game.weights
-    
-    
+
     screen.blit(text, [150, 0])
     if game.state == "gameover":
         screen.blit(text_game_over, [20, 200])
