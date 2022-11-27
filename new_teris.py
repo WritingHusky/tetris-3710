@@ -180,6 +180,7 @@ train = Trainer()
 start_up = False
 replay = False
 classic_move = False
+replaying = False
 if start_up:
     player_choice = False
     custom_ai = True
@@ -202,7 +203,9 @@ if start_up:
         if input("would like classic movement? [Y/N]") == "Y":
             classic_move = True
 
-        buff = input("Ready to begin?")
+        print("Ready to begin? Press space to begin")
+        replaying = True
+        
 
 # Initialize the game engine
 pygame.init()
@@ -226,6 +229,16 @@ fps = 25
 counter = 0
 
 pressing_down = False
+
+while replaying:
+    for event in list(pygame.event.get()):
+        if event.type == pygame.QUIT:
+            done = True
+            replaying = False
+            break
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                replaying = False
 
 while not done:
     # Create figure if there is none
@@ -340,7 +353,7 @@ while not done:
     # Drawing the screen:
     screen.fill(WHITE)
 
-    #
+    
     for i in range(game.height):
         for j in range(game.width):
             pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
