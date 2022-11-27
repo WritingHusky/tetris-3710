@@ -131,6 +131,9 @@ class Trainer:
         
         # Set the new population as the population
         self.population = new_population
+        
+        # Reset the fitness list
+        self.fitness = []
             
         return  # End
     
