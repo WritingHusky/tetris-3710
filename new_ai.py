@@ -127,7 +127,7 @@ def find_best_place (playField, figureR, weights=[0.25,0.25,0.25,0.25]):  #weigh
                 amtBumpy = bumpiness(newPlayfield)
                 completedLines = completed_lines(newPlayfield)
 
-                placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights) 
+                placementScore = f(aggHeight, numHoles, amtBumpy, completedLines, weights, position[1]) 
 
                 placement = [rotation, position]
                 placements.append([placementScore, placement])
@@ -151,12 +151,13 @@ def find_best_place (playField, figureR, weights=[0.25,0.25,0.25,0.25]):  #weigh
     return  bestPlacement  # best place returned
 
 
-def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.25]):
+def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.25], row=20):
     """The evaluation function of a state
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
 
     score = ((aggHeight**2) * weights[0]) + ((numHoles**4) * weights[1]) + ((amtBumpy**2) * weights[2]) + ( ((4 - completedLines)**5) * weights[3])
+    score += ((5*(20-row)))
     
     return score
 
