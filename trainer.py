@@ -119,7 +119,7 @@ class Trainer:
                 
             while len(new_ephoc) < self.size:
                 #print("adding a child")
-                new_ephoc.append(self.gen_mod_rand)    
+                new_ephoc.append(self.gen_mod_rand())    
 
         
         # Mutate and normalize the entire generation
