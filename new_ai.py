@@ -157,7 +157,7 @@ def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.2
     # decision based on statistics
 
     score = ((aggHeight**2) * weights[0]) + ((numHoles**4) * weights[1]) + ((amtBumpy**2) * weights[2]) + ( ((4 - completedLines)**5) * weights[3])
-    score += ((5*(20-row)))
+    #score += ((5*(20-row)))
     
     return score
 
