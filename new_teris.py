@@ -5,12 +5,12 @@ import trainer
 
 colors = [
     (0, 0, 0),
-    (120, 37, 179),
-    (100, 179, 179),
-    (80, 34, 22),
-    (80, 134, 22),
-    (180, 34, 22),
-    (180, 34, 122),
+    (0, 0, 255),
+    (0, 255, 255),
+    (255, 0, 0),
+    (0, 255, 0),
+    (128, 0, 128),
+    (255, 255, 0),
 ]
 
 
@@ -46,7 +46,7 @@ class Figure:
 
 
 class Tetris:
-    level = 2
+    level = 0
     score = 0
     cleared_lines = 0
     state = "start"
@@ -57,12 +57,15 @@ class Tetris:
     y = 60
     zoom = 20
     figure = None
+    max_score = 0
+    max_lines = 0
     weights = [0.25, 0.25, 0.25, 0.25]
 
     def __init__(self, height, width):
         self.height = height
         self.width = width
         self.field = []
+        self.level = 0
         self.score = 0
         self.cleared_lines = 0
         self.state = "start"
@@ -110,7 +113,15 @@ class Tetris:
                 for i1 in range(i, 1, -1):
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
-        self.score += lines ** 2
+        
+        self.score += 4 * (self.level + 1)
+        self.cleared_lines += lines
+        if (self.level + 2) * 5 <= self.cleared_lines // (self.level + 1):
+            self.level += 1
+        if (self.score > self.max_score):
+            self.max_score = self.score
+        if (self.cleared_lines > self.max_lines):
+            self.max_lines = self.cleared_lines
 
     # hard drop piece on space press
     def go_space(self):
@@ -214,6 +225,7 @@ pygame.init()
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+DRED = (255, 0, 0)
 
 # Size of the screen
 size = (600, 500)
@@ -351,7 +363,7 @@ while not done:
         game.figure = None
 
     # Drawing the screen:
-    screen.fill(WHITE)
+    screen.fill(BLACK)
 
     
     for i in range(game.height):
@@ -373,7 +385,11 @@ while not done:
 
     font = pygame.font.SysFont('Calibri', 25, True, False)
     font1 = pygame.font.SysFont('Calibri', 65, True, False)
-    text = font.render("Score: " + str(game.score), True, BLACK)
+    text_score = font.render("Score: " + str(game.score), True, WHITE)
+    text_level = font.render("Level: " + str(game.level), True, WHITE)
+    text_lines = font.render("Lines: " + str(game.cleared_lines), True, WHITE)
+    text_max_score = font.render("MAX Score: " + str(game.max_score), True, DRED)
+    text_max_lines = font.render("MAX Lines: " + str(game.max_lines), True, DRED)
     text_game_over = font1.render("Game Over", True, (255, 125, 0))
     text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
 
@@ -382,7 +398,11 @@ while not done:
     # Child number within generation    = train.child_num and train.epoch_size
     # The current modifers              = game.weights
 
-    screen.blit(text, [150, 0])
+    screen.blit(text_level, [325, 70])
+    screen.blit(text_lines, [325, 120])
+    screen.blit(text_score, [325, 170])
+    screen.blit(text_max_lines, [325, 370])
+    screen.blit(text_max_score, [325, 420])
     if game.state == "gameover":
         screen.blit(text_game_over, [20, 200])
         screen.blit(text_game_over1, [25, 265])
