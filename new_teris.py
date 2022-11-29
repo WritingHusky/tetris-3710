@@ -190,7 +190,7 @@ train = Trainer()
 # Start up info
 start_up = False
 replay = False
-classic_move = False
+classic_move = True
 replaying = False
 if start_up:
     player_choice = False
@@ -296,14 +296,16 @@ while not done:
 
     # region ai input
     if player == "ai" and not classic_move:
+        
+        for event in list(pygame.event.get()):
+            if event.type == pygame.QUIT:
+                done = True
+        
         # Put the piece where it should go
         game.figure.rotation = game.ai_rotate
         game.figure.x = game.ai_x
         game.figure.y = game.ai_y
 
-        for event in list(pygame.event.get()):
-            if event.type == pygame.QUIT:
-                done = True
         game.freeze()
     elif player == "ai" and classic_move:
         if not game.figure.rotation == game.ai_rotate:
@@ -346,6 +348,8 @@ while not done:
             # "generation":self.generation
             # }
 
+            save_data["lines"] = game.cleared_lines
+    
             # Saving code Here
             print(f"generation: {train.trainer.generation} \n{save_data}")
             # Then Generate a new set of weights to use
