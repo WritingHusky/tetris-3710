@@ -1,5 +1,5 @@
-from re import I
-from syslog import LOG_LOCAL0
+#from re import I
+#from syslog import LOG_LOCAL0
 import copy
 #from tetris import Figure
 
@@ -156,7 +156,9 @@ def f(aggHeight, numHoles, amtBumpy, completedLines, weights=[0.25,0.25,0.25,0.2
         Returns a value 0<x<10? on how good the state is"""
     # decision based on statistics
 
-    score = ((aggHeight**2) * weights[0]) + ((numHoles**4) * weights[1]) + ((amtBumpy**2) * weights[2]) + ( ((4 - completedLines)**5) * weights[3])
+    score = ((aggHeight) * weights[0]) + ((numHoles) * weights[1]) + ((amtBumpy) * weights[2]) + ( ((4 - completedLines)) * weights[3])
+
+    #score = ((aggHeight**2) * weights[0]) + ((numHoles**4) * weights[1]) + ((amtBumpy**2) * weights[2]) + ( ((4 - completedLines)**5) * weights[3])
     #score += ((5*(20-row)))
     
     return score
