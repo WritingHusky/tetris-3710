@@ -114,7 +114,7 @@ class Tetris:
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
         
-        self.score += 4 * (self.level + 1)
+        self.score += 4 * (self.level + 1) * lines
         self.cleared_lines += lines
         if (self.level + 2) * 5 <= self.cleared_lines // (self.level + 1):
             self.level += 1
