@@ -203,6 +203,7 @@ while not done:
                 pressing_down = False
 
     if game.state == "roundover":
+            print(f"lines: {game.score}", flush=True)
             game.__init__(20,10)
             game.figure = None
 
